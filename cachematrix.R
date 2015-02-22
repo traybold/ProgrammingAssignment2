@@ -1,15 +1,67 @@
-## Put comments here that give an overall description of what your
-## functions do
+# Functions makeCacheMatrix() and cacheSolve() work together
+# to store a matrix and its inverse, so that it must be
+# solved only once.
+#
+# makeCacheMatrix() returns a list of accessor functions
+# that store and retrieve a matrix and its inverse.
+# cacheSolve() uses those functions to calculate and cache
+# the matrix's inverse to avoid repeating the calculation.
 
-## Write a short comment describing this function
 
-makeCacheMatrix <- function(x = matrix()) {
 
+# makeCacheMatrix() takes a matrix and returns a list of 4
+# functions that update or retrieve the matrix or its
+# inverse.  The functions act on 2 slots, one for the matrix
+# and the other for its inverse.
+#
+# set() stores a value in the matrix slot and sets the
+# inverse slot to NULL
+#
+# get() returns the matrix slot's current value.
+#
+# setInverse() stores a value in the inverse slot.
+#
+# getInverse() returns the inverse slot's current value,
+# which is NULL until setInverse() stores a value there.
+
+makeCacheMatrix <- function(mat = matrix()) {
+    inv <- NULL
+    set <- function(matNew) {
+        mat <<- matNew
+        inv <<- NULL
+    }
+    get <- function() {
+        mat
+    }
+    setInverse <- function(invNew) {
+        inv <<- invNew
+    }
+    getInverse <- function() {
+        inv
+    }
+    list (set = set, get = get,
+          setInverse = setInverse,
+          getInverse = getInverse)
 }
 
 
-## Write a short comment describing this function
+# cacheSolve() takes a container created by
+# makeCacheMatrix() and returns the inverse of the matrix
+# slot's current value.  If the container's inverse slot is
+# NULL, then the inverse is calculated and stored in that
+# slot.  Otherwise, the inverse slot's current value is
+# returned.
 
-cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+cacheSolve <- function(matHolder, ...) {
+    # Return a matrix that is the inverse of 'matHolder$mat'
+    inv <- matHolder$getInverse()
+    if (!is.null(inv)) {
+        message("getting cached data")
+        return(inv)
+    }
+    mat <- matHolder$get()
+    inv <- solve(mat, ...)
+    matHolder$setInverse(inv)
+    inv
 }
+
